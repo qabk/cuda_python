@@ -67,6 +67,8 @@ def run_filter(input_image):
     output_img = np.zeros_like(input_image)
     fil = np.ones((5,5))/25
     fil_global_mem = cuda.to_device(fil)
+    res_med = np.zeros_like(input_image)
+    res_avr =  np.zeros_like(input_image)
 
     """
     khởi tạo và cấp phát 2 array 
@@ -99,14 +101,13 @@ def run_filter(input_image):
         median_filter[blockspergrid, threadsperblock](Input_global, Output_global)
         med_arr_gpu.append(time.time()-start)
         start = time.time()
-        res = cv2.medianBlur(input_image,fil_size)
+        res_med = cv2.medianBlur(input_image,fil_size)
         med_arr_cpu.append(time.time()-start)
-        
         start = time.time()
         corrolation[blockspergrid, threadsperblock](Input_global,fil_global_mem, Output_global)
         avr_arr_gpu.append(time.time()-start)
         start = time.time()
-        res = cv2.filter2D(input_image,-1,fil)
+        res_avr = cv2.filter2D(input_image,-1,fil)
         avr_arr_cpu.append(time.time()-start)
 
     
@@ -130,6 +131,9 @@ def run_filter(input_image):
         start = time.time()
         res = cv2.filter2D(input_image,-1,fil)
         avr_arr_cpu_io.append(time.time()-start)
+
+    cv2.imwrite("images/res_avr.jpg",res_avr)
+    cv2.imwrite("images/res_med.jpg",res_med)
     seq = np.arange(0,30,1)
     figure, axis = plt.subplots(2,2)
     axis[0,0].plot(seq,np.array(med_arr_cpu),'b',label ="cpu")
@@ -151,12 +155,10 @@ def run_filter(input_image):
     axis[1,1].plot(seq,np.array(med_arr_gpu_io),'r',label ="gpu")
     axis[1,1].set_title("Có io cho bộ lọc Blur")
     axis[1,1].legend(fancybox=True)
-
-
     plt.show()
 
 if __name__ == "__main__":
-    img = cv2.imread(r"C:\Users\Admin\Lena.png",cv2.IMREAD_GRAYSCALE)
+    img = cv2.imread(r"images/Median.jpg",cv2.IMREAD_GRAYSCALE)
     run_filter(img)
 
 
