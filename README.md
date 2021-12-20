@@ -4,26 +4,26 @@ Project cài đặt 3 thuật toán gồm bộ lọc trung vị, bộ lọc trun
 
 ### Cách 1: Cài đặt trên linux
 ```
-sudo apt update <br/>
-sudo apt install nvidia-cuda-toolkit<br/>
+sudo apt update 
+sudo apt install nvidia-cuda-toolkit
 ```
 
 ### Cách 2: Cài đặt thông qua Anaconda
 ```
-git clone https://github.com/qabk/cuda_python<br/>
-cd cuda_python<br/>
-conda env create -f py_cuda.yml<br/>
-conda activate py_cuda<br/>
+git clone https://github.com/qabk/cuda_python
+cd cuda_python
+conda env create -f py_cuda.yml
+conda activate py_cuda
 ```
 
 ## Bước 2: Cài các gói thư viện cần thiết
 ```
-pip install -r requirements.txt<br/>
+pip install -r requirements.txt
 ```
 
 ## Bước 3: Chạy thử code
 ```
-python GpuFilter.py<br/>
+python GpuFilter.py
 ```
 
 ## Kết quả trên Gpu và Cpu
