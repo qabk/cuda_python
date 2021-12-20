@@ -63,8 +63,10 @@ def median_filter(Input,  Output):
 so sánh tốc độ của bộ lọc trung vị
 ở cv2 và bộ lọc trung vị cuda
 """
-def run_median_filter(input_image):
+def run_filter(input_image):
     output_img = np.zeros_like(input_image)
+    fil = np.ones((5,5))/25
+    fil_global_mem = cuda.to_device(fil)
 
     """
     khởi tạo và cấp phát 2 array 
@@ -80,7 +82,7 @@ def run_median_filter(input_image):
     blockspergrid = (blockspergrid_x, blockspergrid_y)
 
     """
-    chạy thử và so sánh tốc dộ trên 
+    chạy thử và so sánh tốc độ trên 
     gpu và cpu trung bình(30 lần)
     cho ảnh với 2 TH 
     có io(chuyển từ gpu sang cpu) và 
@@ -88,42 +90,74 @@ def run_median_filter(input_image):
     """
     
     "TH1: không io"
-    arr_gpu = []
-    arr_cpu = []
+    med_arr_gpu = []
+    avr_arr_gpu = []
+    med_arr_cpu = []
+    avr_arr_cpu = []
     for i in range(30):
         start = time.time()
         median_filter[blockspergrid, threadsperblock](Input_global, Output_global)
-        #B = B_global_mem.copy_to_host()
-        arr_gpu.append(time.time()-start)
+        med_arr_gpu.append(time.time()-start)
         start = time.time()
         res = cv2.medianBlur(input_image,fil_size)
-        arr_cpu.append(time.time()-start)
+        med_arr_cpu.append(time.time()-start)
+        
+        start = time.time()
+        corrolation[blockspergrid, threadsperblock](Input_global,fil_global_mem, Output_global)
+        avr_arr_gpu.append(time.time()-start)
+        start = time.time()
+        res = cv2.filter2D(input_image,-1,fil)
+        avr_arr_cpu.append(time.time()-start)
+
     
     "TH2: có io"
-    arr_gpu_io = []
-    arr_cpu_io = []
+    med_arr_gpu_io = []
+    med_arr_cpu_io = []
+    avr_arr_gpu_io = []
+    avr_arr_cpu_io = []
     for i in range(30):
         start = time.time()
         median_filter[blockspergrid, threadsperblock](Input_global, Output_global)
         B = Output_global.copy_to_host()
-        arr_gpu_io.append(time.time()-start)
+        med_arr_gpu_io.append(time.time()-start)
         start = time.time()
         res = cv2.medianBlur(input_image,fil_size)
-        arr_cpu_io.append(time.time()-start)
-    
-    figure, axis = plt.subplots(1, 2)
-    axis[0].plot(arr_cpu,'b')
-    axis[0].plot(arr_gpu,'r')
-    axis[0].set_title("Tốc độ khi không có io")
+        med_arr_cpu_io.append(time.time()-start)
 
-    axis[1].plot(arr_cpu_io,'b')
-    axis[1].plot(arr_gpu_io,'r')
-    axis[1].set_title("Tốc độ khi có io")
+        start = time.time()
+        corrolation[blockspergrid, threadsperblock](Input_global,fil_global_mem, Output_global)
+        avr_arr_gpu_io.append(time.time()-start)
+        start = time.time()
+        res = cv2.filter2D(input_image,-1,fil)
+        avr_arr_cpu_io.append(time.time()-start)
+    seq = np.arange(0,30,1)
+    figure, axis = plt.subplots(2,2)
+    axis[0,0].plot(seq,np.array(med_arr_cpu),'b',label ="cpu")
+    axis[0,0].plot(seq,np.array(med_arr_gpu),'r',label ="gpu")
+    axis[0,0].set_title("Không có io cho bộ lọc trung vị")
+    axis[0,0].legend(fancybox=True)
+
+    axis[0,1].plot(seq,np.array(med_arr_cpu_io),'b',label ="cpu")
+    axis[0,1].plot(seq,np.array(med_arr_gpu_io),'r',label ="gpu")
+    axis[0,1].set_title("Có io cho bộ lọc trung vị")
+    axis[0,1].legend(fancybox=True)
+
+    axis[1,0].plot(seq,np.array(avr_arr_cpu),'b',label ="cpu")
+    axis[1,0].plot(seq,np.array(avr_arr_gpu),'r',label ="gpu")
+    axis[1,0].set_title("Không có io cho bộ lọc Blur")
+    axis[1,0].legend(fancybox=True)
+
+    axis[1,1].plot(seq,np.array(med_arr_cpu_io),'b',label ="cpu")
+    axis[1,1].plot(seq,np.array(med_arr_gpu_io),'r',label ="gpu")
+    axis[1,1].set_title("Có io cho bộ lọc Blur")
+    axis[1,1].legend(fancybox=True)
+
+
     plt.show()
 
 if __name__ == "__main__":
     img = cv2.imread(r"C:\Users\Admin\Lena.png",cv2.IMREAD_GRAYSCALE)
-    run_median_filter(img)
+    run_filter(img)
 
 
 
