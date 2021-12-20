@@ -1,5 +1,5 @@
 # cuda_python
-
+Project cài đặt 3 thuật toán gồm bộ lọc trung vị, bộ lọc trung bình và phép nhân ma trận. Cả 3 thuật toán được cài đặt trên GPU thông qua các API của Cuda và Numba, tốc độ thực thi phần cứng được so sánh trong 2 trường hợp chỉ tính toán trên GPU và tính toán trên GPU rồi trả về RAM CPU. Tốc độ được so sánh dựa trên phần cứng gồm RTX 2060 8GB và CPU i5 9400F 
 ## Bước 1: Cài đặt Cuda toolkit
 
 ### Cách 1: Cài đặt trên linux
@@ -31,9 +31,7 @@ python GpuFilter.py<br/>
   <img src="https://github.com/qabk/cuda_python/blob/main/images/Compare_speed.png"> 
 </p>
 
-## Ảnh gốc và ảnh sau khi lọc trung bình và trung vị
+## Tốc độ của Fast MatMul so với tốc độ của numpy
 <p align="center">
-  <img src="https://github.com/qabk/cuda_python/blob/main/images/Median.jpg"> 
-  <img src="https://github.com/qabk/cuda_python/blob/main/images/res_avr.jpg"> 
-  <img src="https://github.com/qabk/cuda_python/blob/main/images/res_med.jpg"> 
+  <img src="https://github.com/qabk/cuda_python/blob/main/images/mat_mul_res.png"> 
 </p>
